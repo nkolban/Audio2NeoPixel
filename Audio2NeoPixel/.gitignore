@@ -1,0 +1,5 @@
+# Exclude all the object files
+*.o
+player
+recorder
+sndfiletest
