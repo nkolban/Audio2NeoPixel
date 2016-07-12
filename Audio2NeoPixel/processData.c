@@ -17,6 +17,8 @@
  * following a call to processData, the return array of doubles has been
  * populated with a malloced memory buffer which is 'numItems' in size.  The data contained within
  * contains the magnitude of the frequency.
+ *
+ * @github https://github.com/nkolban/Audio2NeoPixel
  */
 #include <stdio.h>
 #include <string.h>

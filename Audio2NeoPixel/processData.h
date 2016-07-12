@@ -1,3 +1,6 @@
+/**
+ * @github https://github.com/nkolban/Audio2NeoPixel
+ */
 #include <fftw3.h>
 
 struct processData_t {

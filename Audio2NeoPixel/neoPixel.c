@@ -1,3 +1,8 @@
+/**
+ * Encapsulate our interface to NeoPixels.
+ *
+ * @github https://github.com/nkolban/Audio2NeoPixel
+ */
 #include <math.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -6,7 +11,7 @@
 #define ARDUINO_ADDRESS (0x10)
 #define MAX_AUDIO 1000000
 
-static void HSVtoRGB( float *r, float *g, float *b, float h, float s, float v );
+static void HSVtoRGB( unsigned char *red, unsigned char *green, unsigned char *blue, float h, float s, float v );
 
 void neopixel_init() {
   i2c_init(ARDUINO_ADDRESS);
@@ -27,23 +32,26 @@ void neopixel_process(double *data, int pixelCount) {
     if (value > 1.0) {
       value = 1.0;
     }
-    HSVtoRGB(&red, &green, &blue, 360*i/pixelCount, 1, value);
-    *ptr = (char)(red*255); ptr++;
-    *ptr = (char)(green*255); ptr++;
-    *ptr = (char)(blue*255); ptr++;    
-  }
-  i2c_writePixels(rgbData, pixelCount);
+    HSVtoRGB(ptr, ptr+1, ptr+2, 360*i/pixelCount, 1, value);
+    ptr += 3;
+  } // End of loop over each of the pixels.
+  i2c_writePixels(rgbData, pixelCount); // Send the pixels to the Arduino to the NeoPixel string.
   printf("Writing data ...\n");
   free(rgbData);
-}
+} // End of neopixel_process
 
-static void HSVtoRGB( float *r, float *g, float *b, float h, float s, float v )
+
+/**
+ * Convert an HSV color value to an RGB color value.
+ */
+static void HSVtoRGB( unsigned char *red, unsigned char *green, unsigned char *blue, float h, float s, float v )
 {
 	int i;
 	float f, p, q, t;
+	float r,g,b;
 	if( s == 0 ) {
 		// achromatic (grey)
-		*r = *g = *b = v;
+		*red = *green = *blue = (unsigned char)(v*255);
 		return;
 	}
 	h /= 60;			// sector 0 to 5
@@ -54,34 +62,37 @@ static void HSVtoRGB( float *r, float *g, float *b, float h, float s, float v )
 	t = v * ( 1 - s * ( 1 - f ) );
 	switch( i ) {
 		case 0:
-			*r = v;
-			*g = t;
-			*b = p;
+			r = v;
+			g = t;
+			b = p;
 			break;
 		case 1:
-			*r = q;
-			*g = v;
-			*b = p;
+			r = q;
+			g = v;
+			b = p;
 			break;
 		case 2:
-			*r = p;
-			*g = v;
-			*b = t;
+			r = p;
+			g = v;
+			b = t;
 			break;
 		case 3:
-			*r = p;
-			*g = q;
-			*b = v;
+			r = p;
+			g = q;
+			b = v;
 			break;
 		case 4:
-			*r = t;
-			*g = p;
-			*b = v;
+			r = t;
+			g = p;
+			b = v;
 			break;
 		default:		// case 5:
-			*r = v;
-			*g = p;
-			*b = q;
+			r = v;
+			g = p;
+			b = q;
 			break;
 	}
-}
+  *red = (unsigned char)(r*255);
+  *green = (unsigned char)(g*255);
+  *blue = (unsigned char)(b*255);
+} // End of HSVtoRGB

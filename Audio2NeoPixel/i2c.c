@@ -1,3 +1,8 @@
+/**
+ * Encapsulate I2C communication to the Arduino.
+ *
+ * @github https://github.com/nkolban/Audio2NeoPixel
+ */
 #include <wiringPiI2C.h>
 #include <stdio.h>
 #include <errno.h>
@@ -6,8 +11,15 @@
 #include <arpa/inet.h>
 #include "i2c.h"
 
+/**
+ * The file descriptor representing our pipe through I2C to the Arduino.
+ */
 static int fd;
 
+
+/**
+ * Initialize the I2C environment.
+ */
 void i2c_init(int deviceAddress) {
   wiringPiSetupGpio();
   fd = wiringPiI2CSetup(deviceAddress);
@@ -15,33 +27,25 @@ void i2c_init(int deviceAddress) {
     printf("Error starting I2C!");
     return;
   }
-}
+} // End of i2c_init
 
+
+/**
+ * Send a stream of pixels that are found in the buffer down the I2C channel.
+ * The data stream is composed of 4 byte length, followed by 3 byte pixels that
+ * repeat for the length sequence.  Each pixel is composed of 3 bytes, one for
+ * each of the red, green and blue channels.
+ */
 void i2c_writePixels(char *buffer, int pixels) {
   int result;
   int i;
-  unsigned long size = htonl(pixels);
-  write(fd, &size, sizeof(unsigned long));
-  printf("Writing pixels: %d\n", pixels);
-  for (i=0; i<pixels; i++) {
-    result = write(fd, buffer, 3);
-    buffer+=3;
+  unsigned long pixelsNetworkByteOrder = htonl(pixels);      // Convert the size to network byte order
+  write(fd, &pixelsNetworkByteOrder, sizeof(unsigned long)); // Send the count of pixels down the I2C bus
+  for (i=0; i<pixels; i++) {               // Loop over each of the pixels (3 bytes in size)
+    result = write(fd, buffer, 3);         // Send the next pixel down the I2C bus
+    buffer+=3;                             // Each pixel is 3 bytes long, skip the 3 bytes just sent.
     if (result == -1) {
         perror("Error writing to I2C");
     }
-  }
-
-  /*
-  int i,j;
-  for (i=0; i<pixels; i++) {
-    for (j=0; j<3; j++) {
-      result = wiringPiI2CWrite(fd, *buffer);
-      //result = wiringPiI2CWriteReg16(fd, 0x40, (i & 0xfff) );
-      if (result == -1) {
-        perror("Error writing to I2C");
-      }
-      buffer++;
-    }
-  }*/
-  
-}
+  } // End of loop over each of the pixels.
+} // End of i2c_writePixels

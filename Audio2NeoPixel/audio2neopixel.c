@@ -2,6 +2,8 @@
  * Process an ALSA audio input source such as a line-in or microphone.
  * Decode the audio data and break it apart into its frequency spectrum.
  * Make the data available through a WebSocket connection.
+ *
+ * @github https://github.com/nkolban/Audio2NeoPixel
  */
 #include <stdio.h>
 #include <unistd.h>

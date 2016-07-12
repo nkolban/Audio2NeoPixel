@@ -16,7 +16,8 @@ char *buildJSONArray(double *data, int size) {
   strcpy(ret, string);
   json_object_put(array);
   return ret;
-}
+} // End of buildJSONArray
+
 
 /**
  * Build a JSON command string that looks like:
@@ -42,4 +43,4 @@ char *buildInformCommand(double *data, int size) {
   strcpy(ret, string);
   json_object_put(command);
   return ret;
-}
+} // End of buildInformCommand
