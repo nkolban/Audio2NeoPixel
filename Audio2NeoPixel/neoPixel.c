@@ -36,7 +36,7 @@ void neopixel_process(double *data, int pixelCount) {
     ptr += 3;
   } // End of loop over each of the pixels.
   i2c_writePixels(rgbData, pixelCount); // Send the pixels to the Arduino to the NeoPixel string.
-  printf("Writing data ...\n");
+  //printf("Writing data ...\n");
   free(rgbData);
 } // End of neopixel_process
 

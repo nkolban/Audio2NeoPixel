@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <libwebsockets.h>
 #include "webSocket.h"
+
 static int sendWebSocketData(struct libwebsocket *wsi, unsigned char *buf, size_t len);
 static struct libwebsocket_context *context = NULL;
 static struct libwebsocket *gWsi = NULL;
@@ -69,9 +70,7 @@ static int sendWebSocketData(struct libwebsocket *wsi, unsigned char *buf, size_
 	free(tmpBuf);
 	return rc;
 }
-void websocket_init() {
-
-
+void websocket_init(unsigned short portNumber) {
 	memset(protocols, 0, sizeof(protocols));
 	protocols[0].name = "http-only";
 	protocols[0].callback = httpCallback;
@@ -80,7 +79,7 @@ void websocket_init() {
 	
 
 	memset(&info, 0, sizeof(info));
-	info.port = 3000;
+	info.port = portNumber;
 	info.gid = -1;
 	info.uid = -1;
 	info.protocols = protocols;

@@ -8,6 +8,39 @@ static snd_pcm_uframes_t frames;
 static snd_pcm_hw_params_t *params;
 
 /**
+ * List the devices ...
+ */
+void alsa_listInputDevices() {
+  int rc;
+  void **hints;
+
+  rc = snd_device_name_hint(-1, "pcm", &hints);
+  if (rc != 0) {
+    return;
+  }
+  int i = 0;
+  while(hints[i] != NULL) {
+    char *name = snd_device_name_get_hint(hints[i], "NAME");
+    char *desc = snd_device_name_get_hint(hints[i], "DESC");
+    char *IOID = snd_device_name_get_hint(hints[i], "IOID");
+    if (IOID == NULL || (IOID != NULL && strcmp(IOID, "Input")==0)) {
+      printf("Device Name=%s\n -- Description=%s\n", name, desc);
+    }
+    if (name) {
+      free(name);
+    }
+    if (desc) {
+      free(desc);
+    }
+    if (IOID) {
+      free(IOID);
+    }
+    i++;
+  }
+  snd_device_name_free_hint(hints);
+} // End of alsa_listInputDevices
+
+/**
  * Capture an array of data.
  */
 int alsa_capture(short *buffer) {

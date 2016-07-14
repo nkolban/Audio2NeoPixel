@@ -1,0 +1,21 @@
+{
+  "name": "audio2neopixelweb",
+  "version": "1.0.0",
+  "description": "Web part of Audio2NeoPixel",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/nkolban/Audio2NeoPixel.git"
+  },
+  "dependencies": {
+    "express": "*"
+  },
+  "main": "webserver.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "neopixel"
+  ],
+  "author": "Neil Kolban",
+  "license": "ISC"
+}
