@@ -32,17 +32,19 @@ void i2c_init(int deviceAddress) {
 
 /**
  * Send a stream of pixels that are found in the buffer down the I2C channel.
- * The data stream is composed of 4 byte length, followed by 3 byte pixels that
+ * The data stream is composed of 2 byte length, followed by 3 byte pixels that
  * repeat for the length sequence.  Each pixel is composed of 3 bytes, one for
  * each of the red, green and blue channels.
  */
 void i2c_writePixels(char *buffer, int pixels) {
   int result;
   int i;
-  unsigned long pixelsNetworkByteOrder = htonl(pixels);      // Convert the size to network byte order
-  write(fd, &pixelsNetworkByteOrder, sizeof(unsigned long)); // Send the count of pixels down the I2C bus
+  unsigned short pixelsNetworkByteOrder = htons(pixels);      // Convert the size to network byte order
+  write(fd, &pixelsNetworkByteOrder, sizeof(pixelsNetworkByteOrder)); // Send the count of pixels down the I2C bus
+  //usleep(20*1000);
   for (i=0; i<pixels; i++) {               // Loop over each of the pixels (3 bytes in size)
     result = write(fd, buffer, 3);         // Send the next pixel down the I2C bus
+    //usleep(20*1000);
     buffer+=3;                             // Each pixel is 3 bytes long, skip the 3 bytes just sent.
     if (result == -1) {
         perror("Error writing to I2C");

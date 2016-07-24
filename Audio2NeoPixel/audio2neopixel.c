@@ -41,6 +41,11 @@ static int groupSize = 11;
 static unsigned short portNumber = 3000;
 
 /**
+ * Number of pixels in the string;
+ */
+static unsigned short numPixels = 60;
+
+/**
  * Handle the parsing options.
  */
 static int parse_opt(int key, char *arg, struct argp_state *state) {
@@ -68,11 +73,25 @@ static int parse_opt(int key, char *arg, struct argp_state *state) {
       return 1;
     }
     break;
-  }
 
+  case 'n':
+    numPixels = atoi(arg);
+    if (numPixels <= 0) {
+      printf("Invalid pixel could.\n");
+      return 1;
+    }
+    break;
+
+  } // End of switch
   return 0;
 } // End of parse_opt
 
+static void newConnectionCB() {
+  printf("We have a new connection!\n");
+  char *data = json_buildNewClientMessage(groupSize);
+  webSocket_send(data, strlen(data));
+  free(data);
+}
 
 int main(int argc, char **argv) {
   int    sendsPerSecond = 10;
@@ -81,6 +100,7 @@ int main(int argc, char **argv) {
   int    channels = 1;
 	int    frames = 1024;
 	short  *alsaCaptureBuffer;
+
 	size_t alsaCaptureBufferSize;
   int    end = 0; // Flag to indicate end of processing.
 
@@ -107,6 +127,7 @@ int main(int argc, char **argv) {
       {"device",    'D', "device_name", 0, "Specify an audio input device"},
       {"list",      'L', 0,             0, "List audio capture devices"},
       {"groupsize", 'g', "group_size",  0, "The size of the group of results"},
+      {"numpixels", 'n', "num_pixels",  0, "The number of pixels in the string (default=60)"},
       {"port",      'p', "port_number", 0, "Web socket listener port (default=3000)"},
       {0}
   };
@@ -132,10 +153,10 @@ int main(int argc, char **argv) {
     exit(1);
   }
 
-  printf("device=%s, rate=%d, channels=%d, frames in sample=%d, groupSize=%d\n", pcmDevice, rate, channels, frames, groupSize);
+  printf("device=%s, rate=%d, channels=%d, frames in sample=%d, groupSize=%d, numPixels=%d\n", pcmDevice, rate, channels, frames, groupSize, numPixels);
   alsa_init(pcmDevice, channels, rate, frames);
-  websocket_init(portNumber);
-  neopixel_init();
+  websocket_init(portNumber, newConnectionCB);
+  neopixel_init(numPixels);
 
   processData_init(&processDataInstance, frames);
 
@@ -149,7 +170,7 @@ int main(int argc, char **argv) {
   while(!end) {
     rc = alsa_capture(alsaCaptureBuffer);
     if (rc < 0) {
-      printf("ERROR: Can't read data. %s\n", snd_strerror(rc));
+      printf("ERROR: alsa_capture: Can't read data. %s\n", snd_strerror(rc));
     }
 	
     gettimeofday(&now, NULL);
@@ -161,7 +182,7 @@ int main(int argc, char **argv) {
       groupData = processData_logGroup(result, rate/2, frames/2, groupSize);
       if (groupData != NULL) {
         neopixel_process(groupData, groupSize);
-        jsonString = buildJSONArray(groupData, groupSize);
+        jsonString = json_buildArray(groupData, groupSize);
         webSocket_send(jsonString, strlen(jsonString));
         free(groupData);
         free(jsonString);

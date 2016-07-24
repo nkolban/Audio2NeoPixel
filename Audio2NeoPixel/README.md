@@ -11,6 +11,16 @@ The `Makefile` included in the package can be used to build the executable.
 The solution uses an Arduino to drive the NeoPixel string.  The sketch for the Arduino is found in `arduino.ino`.  The
 Arduino appears as an I2C slave device on I2C address `0x10`.
 
+The command to start listening for incoming audio data and driving the NeoPixels is called `audio2neopixel`.  It has some command
+line flags:
+
+* `-D device_name` - The identity of the audio device to capture data from.  The list of possible devices can
+be found by running with the `-L` flag.
+* `-g group_size` - The size (group length) of NeoPixels.  The default is 11.
+* `-p port_number` - The port number to listen on for Web Socket data requests.  The default is 3000.
+* `-L` - List the audio devices available.  The program ends after listing the information.
+* `-?` - Show a help/usage message.
+
 ## Architecture
 The application is written in C for compilation on the Raspberry Pi / Raspbian.  The core source file
 is `audio2neopixel.c` with the other source files being encapsulators for other parts of function.

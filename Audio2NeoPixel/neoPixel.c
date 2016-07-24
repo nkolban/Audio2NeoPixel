@@ -12,8 +12,10 @@
 #define MAX_AUDIO 1000000
 
 static void HSVtoRGB( unsigned char *red, unsigned char *green, unsigned char *blue, float h, float s, float v );
+static unsigned short numPixels;
 
-void neopixel_init() {
+void neopixel_init(unsigned short p_numPixels) {
+  numPixels = p_numPixels;
   i2c_init(ARDUINO_ADDRESS);
 }
 
@@ -23,7 +25,7 @@ void neopixel_init() {
  * via I2C to the Arduino to be displayed on the physical NeoPixels.
  */
 void neopixel_process(double *data, int pixelCount) {
-  char *rgbData = malloc(pixelCount * 3);
+  char *rgbData = malloc(numPixels * 3);
   char *ptr = rgbData;
   int i;
   float red, green, blue;
@@ -35,7 +37,22 @@ void neopixel_process(double *data, int pixelCount) {
     HSVtoRGB(ptr, ptr+1, ptr+2, 360*i/pixelCount, 1, value);
     ptr += 3;
   } // End of loop over each of the pixels.
-  i2c_writePixels(rgbData, pixelCount); // Send the pixels to the Arduino to the NeoPixel string.
+  i=0;
+  int j=pixelCount;
+  while(j < numPixels) {
+    *ptr = rgbData[i*3];
+    ptr++;
+    *ptr = rgbData[i*3+1];
+    ptr++;
+    *ptr = rgbData[i*3+2];
+    ptr++;
+    i++;
+    if (i >= pixelCount) {
+      i=0;
+    }
+    j++;
+  }
+  i2c_writePixels(rgbData, numPixels); // Send the pixels to the Arduino to the NeoPixel string.
   //printf("Writing data ...\n");
   free(rgbData);
 } // End of neopixel_process

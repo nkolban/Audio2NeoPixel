@@ -2,16 +2,36 @@
  * 
  */
 $(function(){
-  const LED_COUNT=11;
+  var LED_COUNT;
   const MAX_AUDIO=1000000;
   const BAR_HEIGHT=200;
   let width = $("#scene").width()-5;
-  let led_width = Math.floor(width/LED_COUNT);
+  var led_width;
   let canvas=$("#scene").get(0);
   let rectangleArray = [];
   let ledsArray = [];
+
   paper.setup(canvas);
+  newSize(11);
   drawScales();
+  
+  function newSize(size) {
+    LED_COUNT = size;
+    led_width = Math.floor(width/LED_COUNT);
+    for (let i=0; i<ledsArray.length; i++) {
+      ledsArray[i].remove();
+    }
+    ledsArray = [];
+    for (let i=0; i<rectangleArray.length; i++) {
+      rectangleArray[i].remove();
+    }
+    rectangleArray = [];
+    if (paper.project != null) {
+      paper.project.activeLayer.removeChildren();
+  }
+    drawScales();
+    paper.view.update();
+  }
   
 
   
@@ -26,9 +46,13 @@ $(function(){
     ws.onmessage = function(messageEvent) {
       console.log("Data: " + messageEvent.data);
       let data = JSON.parse(messageEvent.data);
-      drawBars(data);
-      drawLeds(data);
-      paper.view.update();
+      if (Array.isArray(data)) {
+        drawBars(data);
+        drawLeds(data);
+        paper.view.update();
+      } else {
+        newSize(data.groupSize);
+      }
     }
     ws.onerror = function(err) {
       console.log("Web socket error:" + err);

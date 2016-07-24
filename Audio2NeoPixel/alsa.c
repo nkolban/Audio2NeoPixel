@@ -44,7 +44,11 @@ void alsa_listInputDevices() {
  * Capture an array of data.
  */
 int alsa_capture(short *buffer) {
+  snd_pcm_sframes_t count = snd_pcm_avail(pcm_handle);
+  printf("Frames available to read %d\n", count);
   int rc = snd_pcm_readi(pcm_handle, buffer, frames);
+  //snd_pcm_drop(pcm_handle);
+  snd_pcm_reset(pcm_handle);
   return rc;
 } // End of alsa_capture
 
